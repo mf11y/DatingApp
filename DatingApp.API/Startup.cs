@@ -19,6 +19,7 @@ using System.Net;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Http;
 using DatingApp.API.Helpers;
+using AutoMapper;
 
 namespace DatingApp.API
 {
@@ -36,7 +37,11 @@ namespace DatingApp.API
         {
             services.AddDbContext<DataContext>(x => x.UseSqlite(Configuration.GetConnectionString("DefaultConnection")));
             services.AddCors();
-            services.AddControllers();
+            services.AddControllers().AddNewtonsoftJson( opt =>
+            {
+                opt.SerializerSettings.ReferenceLoopHandling = 
+                Newtonsoft.Json.ReferenceLoopHandling.Ignore;
+            });
             services.AddScoped<IAuthRepository, AuthRepository>();
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 .AddJwtBearer(options => {
@@ -49,6 +54,9 @@ namespace DatingApp.API
                             ValidateAudience = false
                     };
                 });
+
+            services.AddScoped<IDatingRepository, DatingRepository>();
+            services.AddAutoMapper(typeof(DatingRepository).Assembly);
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
